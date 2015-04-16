@@ -47,12 +47,12 @@ public class HK2LogBinder extends AbstractBinder
     @Override
     protected void configure()
     {
-        install(logger(Logger.class, Logger::getLogger, currentClassName()).as(Binder.class));
+        install(loginject(Logger::getLogger, currentClassName()).as(Binder.class));
     }
 }
 ```
 The `install(...)` refers to the standard method from HK2's `AbstractBinder`.
-The `logger(Logger.class, Logger::getLogger, currentClassName())` expression provides a generic logger binding for a `java.util.logging.Logger` that is obtained via `Logger.getLogger(...)` for the class into which it is injected. Note that `currentClassName()` is not the current class in which the expression appears (which would be `HK2LogBinder` in this case) but a placeholder for the class into which the logger will be injected. At injection time, this placeholder will evaluate to different classes for different injection points. Finally, by specifying `as(Binder.class)` you are telling **loginject** that you need a binding for HK2. If you were using Guice you would be using `as(Module.class)` instead.
+The `loginject(Logger::getLogger, currentClassName())` expression provides a generic logger binding for a `java.util.logging.Logger` that is obtained via `Logger.getLogger(...)` for the class into which it is injected. Note that `currentClassName()` is not the current class in which the expression appears (which would be `HK2LogBinder` in this case) but a placeholder for the class into which the logger will be injected. At injection time, this placeholder will evaluate to different classes for different injection points. Finally, by specifying `as(Binder.class)` you are telling **loginject** that you need a binding for HK2. If you were using Guice you would be using `as(Module.class)` instead.
 
 
 
