@@ -27,7 +27,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import static org.junit.Assert.assertEquals;
-import static org.loginject.LogInject.logger;
+import static org.loginject.LogInject.loginject;
 import static org.loginject.LogParameter.currentClass;
 
 public class GuiceLogInjectLog4JTest
@@ -44,7 +44,24 @@ public class GuiceLogInjectLog4JTest
     @Test
     public void testLog4J()
     {
-        Module logger = logger(Logger.class, LogManager::getLogger, currentClass()).as(Module.class);
+        Module logger = loginject(LogManager::getLogger, currentClass()).as(Module.class);
+        Module binder = new AbstractModule()
+        {
+            @Override
+            protected void configure()
+            {
+                install(logger);
+            }
+        };
+        Injector injector = Guice.createInjector(binder);
+        TestClass service = injector.getInstance(TestClass.class);
+        assertEquals(TestClass.class.getName(), service.logger.getName());
+    }
+    
+    @Test
+    public void testInferredLog4J()
+    {
+        Module logger = loginject(LogManager::getLogger, currentClass()).as(Module.class);
         Module binder = new AbstractModule()
         {
             @Override

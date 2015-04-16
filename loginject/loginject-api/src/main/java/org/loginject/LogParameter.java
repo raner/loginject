@@ -18,6 +18,16 @@ package org.loginject;
 
 import java.util.function.Function;
 
+/**
+* A {@link LogParameter} encapsulates a parameter that is passed to a logger factory method at the of injection.
+* It does not necessarily represent a constant value but may vary according to the injection point. For example,
+* {@link #currentClass()} and {@link #currentClassName()} refer to the {@link Class} object and class name at the
+* injection point, not to class that creates the {@link LogParameter}.
+*
+* @param <_Type_> the parameter type (must match the parameter type in the factory method)
+*
+* @author Mirko Raner
+**/
 public class LogParameter<_Type_>
 {
     private final static Class<Class<?>> CLASS = new LogLiteral<Class<?>>(Class.class).getLiteral();
@@ -33,26 +43,62 @@ public class LogParameter<_Type_>
         this.function = function;
     }
 
+    /**
+    * @return a {@link LogParameter} representing the {@link Class} into which the logger is injected.
+    **/
     public static LogParameter<Class<?>> currentClass()
     {
         return CURRENT_CLASS;
     }
 
+    /**
+    * @return a {@link LogParameter} representing the name of the {@link Class} into which the logger is injected.
+    **/
     public static LogParameter<String> currentClassName()
     {
         return CURRENT_CLASS_NAME;
     }
 
+    /**
+    * Returns a {@link LogParameter} representing a constant string (always the same string, independent of injection
+    * point).
+    *
+    * @param the string
+    * @return the {@link LogParameter}
+    **/
     public static LogParameter<String> constantString(String string)
     {
         return new LogParameter<>(String.class, always -> string);
     }
 
+    /**
+    * Returns a {@link LogParameter} representing a constant value (always the same value, independent of injection
+    * point).
+    *
+    * @param the value
+    * @return the {@link LogParameter}
+    **/
+    public static <_Parameter_> LogParameter<_Parameter_> parameter(_Parameter_ parameter)
+    {
+        @SuppressWarnings("unchecked")
+        Class<_Parameter_> parameterType = (Class<_Parameter_>)parameter.getClass();
+        return new LogParameter<_Parameter_>(parameterType, always -> parameter);
+    }
+
+    /**
+    * @return the parameter's type
+    **/
     public Class<_Type_> getParameterType()
     {
         return type;
     }
 
+    /**
+    * Determines the parameter's value for the current injection point.
+    *
+    * @param currentClass the class into which the logger is injected
+    * @return the parameter value
+    **/
     public _Type_ getValue(Class<?> currentClass)
     {
         return function.apply(currentClass);

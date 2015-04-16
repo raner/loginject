@@ -27,7 +27,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
 import static org.junit.Assert.assertEquals;
-import static org.loginject.LogInject.logger;
+import static org.loginject.LogInject.loginject;
 import static org.loginject.LogParameter.currentClass;
 
 public class LogInjectLog4JTest
@@ -40,6 +40,7 @@ public class LogInjectLog4JTest
 
     @Rule
     public TestName testName = new TestName();
+
     @Test
     public void testLog4J()
     {
@@ -48,7 +49,24 @@ public class LogInjectLog4JTest
             @Override
             protected void configure()
             {
-                install(logger(Logger.class, LogManager::getLogger, currentClass()).as(Binder.class));
+                install(loginject(Logger.class, LogManager::getLogger, currentClass()).as(Binder.class));
+                addActiveDescriptor(TestClass.class);
+            }
+        };
+        ServiceLocator serviceLocator = ServiceLocatorUtilities.bind(testName.getMethodName(), binder);
+        TestClass service = serviceLocator.getService(TestClass.class);
+        assertEquals(TestClass.class.getName(), service.logger.getName());
+    }
+    
+    @Test
+    public void testInferredLog4J()
+    {
+        AbstractBinder binder = new AbstractBinder()
+        {
+            @Override
+            protected void configure()
+            {
+                install(loginject(LogManager::getLogger, currentClass()).as(Binder.class));
                 addActiveDescriptor(TestClass.class);
             }
         };

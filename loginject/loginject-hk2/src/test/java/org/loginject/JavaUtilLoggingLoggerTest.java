@@ -28,7 +28,7 @@ import org.junit.rules.TestName;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.loginject.LogInject.logger;
+import static org.loginject.LogInject.loginject;
 import static org.loginject.LogParameter.constantString;
 import static org.loginject.LogParameter.currentClassName;
 
@@ -51,7 +51,7 @@ public class JavaUtilLoggingLoggerTest
             @Override
             protected void configure()
             {
-                install(logger(Logger.class, Logger::getAnonymousLogger).as(Binder.class));
+                install(loginject(Logger.class, Logger::getAnonymousLogger).as(Binder.class));
                 addActiveDescriptor(TestClass.class);
             }
         };
@@ -68,7 +68,7 @@ public class JavaUtilLoggingLoggerTest
 			@Override
 			protected void configure()
 			{
-				install(logger(Logger.class, Logger::getLogger, currentClassName()).as(Binder.class));
+				install(loginject(Logger.class, Logger::getLogger, currentClassName()).as(Binder.class));
 				addActiveDescriptor(TestClass.class);
 			}
 		};
@@ -76,6 +76,23 @@ public class JavaUtilLoggingLoggerTest
 		TestClass service = serviceLocator.getService(TestClass.class);
 		assertEquals(TestClass.class.getName(), service.injectedLogger.getName());
 	}
+    
+    @Test
+    public void testGetInferredLoggerWithStringParameter()
+    {
+        AbstractBinder binder = new AbstractBinder()
+        {
+            @Override
+            protected void configure()
+            {
+                install(loginject(Logger::getLogger, currentClassName()).as(Binder.class));
+                addActiveDescriptor(TestClass.class);
+            }
+        };
+        ServiceLocator serviceLocator = ServiceLocatorUtilities.bind(testName.getMethodName(), binder);
+        TestClass service = serviceLocator.getService(TestClass.class);
+        assertEquals(TestClass.class.getName(), service.injectedLogger.getName());
+    }
 
     @Test
     public void testGetLoggerWithClassNameAndBundleNameParameters()
@@ -86,7 +103,8 @@ public class JavaUtilLoggingLoggerTest
             @Override
             protected void configure()
             {
-                install(logger(Logger.class, Logger::getLogger, currentClassName(), constantString(bundleName)).as(Binder.class));
+                LogParameter<String> parameter = constantString(bundleName);
+                install(loginject(Logger.class, Logger::getLogger, currentClassName(), parameter).as(Binder.class));
                 addActiveDescriptor(TestClass.class);
             }
         };

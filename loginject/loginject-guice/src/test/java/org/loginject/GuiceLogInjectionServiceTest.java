@@ -16,46 +16,44 @@
 
 package org.loginject;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Singleton;
-import org.glassfish.hk2.api.Injectee;
-import org.glassfish.hk2.api.InjectionResolver;
-import org.glassfish.hk2.api.Rank;
-import org.glassfish.hk2.api.ServiceHandle;
+import java.io.Serializable;
+import java.util.AbstractCollection;
+import java.util.AbstractSet;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.logging.Logger;
+import org.junit.Test;
+import static java.util.stream.Collectors.toSet;
+import static org.junit.Assert.assertEquals;
 
-@Rank(1)
-@Singleton
-public class HK2LogInjectionResolver implements InjectionResolver<Inject>
+public class GuiceLogInjectionServiceTest
 {
-    @Inject
-    private LogInject<?> logInject;
+    private GuiceLogInjectionService<?> service = new GuiceLogInjectionService<>();
 
-    @Inject
-    @Named(SYSTEM_RESOLVER_NAME)
-    private InjectionResolver<Inject> systemResolver;
-
-    @Override
-    public Object resolve(Injectee injectee, ServiceHandle<?> root)
+    @Test
+    public void testPotentialBindingsForObject()
     {
-        if ((injectee.getRequiredType() instanceof Class)
-        && ((Class<?>)injectee.getRequiredType()).isAssignableFrom(logInject.getLoggerClass()))
-        {
-            Class<?> injecteeClass = injectee.getInjecteeClass();
-            return logInject.createLogger(injecteeClass);
-        }
-        return systemResolver.resolve(injectee, root);
+        assertEquals(set(Object.class), service.getAllPotentialBindingTypes(Object.class));
     }
 
-    @Override
-    public boolean isConstructorParameterIndicator()
+    @Test
+    public void testPotentialBindingsForHashSet()
     {
-        return false;
+        assertEquals(set(Object.class, HashSet.class, AbstractSet.class, Set.class, Cloneable.class, Serializable.class,
+            AbstractCollection.class, Collection.class, Iterable.class),
+            service.getAllPotentialBindingTypes(HashSet.class));
     }
 
-    @Override
-    public boolean isMethodParameterIndicator()
+    @Test
+    public void testBindingsForLogger()
     {
-        return false;
+        assertEquals(set(Logger.class), service.getAllBindingTypes(Logger.class).collect(toSet()));
+    }
+
+    private Set<Class<?>> set(Class<?>... classes)
+    {
+        return new HashSet<>(Arrays.asList(classes));
     }
 }

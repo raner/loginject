@@ -16,7 +16,9 @@
 
 package org.loginject;
 
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 import com.google.inject.AbstractModule;
@@ -31,7 +33,19 @@ import com.google.inject.spi.DependencyAndSource;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.ProviderInstanceBinding;
 import com.google.inject.spi.ProvisionListener;
+import com.google.inject.util.Modules;
+import static java.util.stream.Collectors.toSet;
 
+/**
+* The class {@link GuiceLogInjectionService} implements a {@link LogInjectionService} for the
+* {@link com.google.inject.Guice Guice} dependency injection framework. It binds a
+* {@link javax.inject.Provider Provider} for the logger class and a {@link ProvisionListener} for obtaining the
+* injection context.
+*
+* @param <_Logger_> the logger type
+*
+* @author Mirko Raner
+**/
 public class GuiceLogInjectionService<_Logger_> implements LogInjectionService<Module, _Logger_>
 {
     @Override
@@ -43,15 +57,21 @@ public class GuiceLogInjectionService<_Logger_> implements LogInjectionService<M
     @Override
     public Module getBindings(LogInject<_Logger_> logInject)
     {
-        Class<_Logger_> loggerClass = logInject.getLoggerClass();
+        Stream<Class<_Logger_>> bindings = getBindingClasses(logInject);
+        Module[] modules = bindings.map(binding -> getBindings(logInject, binding)).toArray(Module[]::new);
+        return Modules.combine(modules);
+    }
+
+    private Module getBindings(LogInject<_Logger_> logInject, Class<_Logger_> loggerClass)
+    {
         TypeLiteral<_Logger_> loggerType = TypeLiteral.get(loggerClass);
+        GuiceLoggerProvider<_Logger_> provider = new GuiceLoggerProvider<_Logger_>();
         Predicate<Dependency<?>> matchesLogger = dependency -> loggerType.equals(dependency.getKey().getTypeLiteral());
         return new AbstractModule()
         {
             @Override
             protected void configure()
             {
-                GuiceLoggerProvider<_Logger_> provider = new GuiceLoggerProvider<_Logger_>();
                 ProvisionListener provisionListener = new ProvisionListener()
                 {
                     @Override
@@ -89,5 +109,49 @@ public class GuiceLogInjectionService<_Logger_> implements LogInjectionService<M
                 bindListener(Matchers.any(), provisionListener);
             }
         };
+    }
+
+    private Stream<Class<_Logger_>> getBindingClasses(LogInject<_Logger_> logInject)
+    {
+        Class<_Logger_> loggerClass = logInject.getLoggerClass();
+        switch (logInject.getLoggerClassType())
+        {
+            case INTERFACE: return Stream.of(loggerClass);
+            case IMPLEMENTATION: return getAllBindingTypes(loggerClass);
+            default: throw new IllegalArgumentException(String.valueOf(logInject.getLoggerClassType()));
+        }
+    }
+
+    private void getAllSuperclassesAndInterfaces(Class<?> type, Set<Class<?>> collected)
+    {
+        if (type != null)
+        {
+            collected.add(type);
+            Class<?> superclass = type.getSuperclass();
+            getAllSuperclassesAndInterfaces(superclass, collected);
+            for (Class<?> implementedInterface: type.getInterfaces())
+            {
+                getAllSuperclassesAndInterfaces(implementedInterface, collected);
+            }
+        }
+    }
+
+    private boolean noJDKClasses(Class<?> type)
+    {
+        String name = type.getName();
+        return !name.startsWith("java.") || name.startsWith("java.util.logging.");
+    }
+
+    Stream<Class<_Logger_>> getAllBindingTypes(Class<?> type)
+    {
+        return getAllPotentialBindingTypes(type).stream().filter(this::noJDKClasses);
+    }
+
+    Set<Class<_Logger_>> getAllPotentialBindingTypes(Class<?> type)
+    {
+        Class<Class<_Logger_>> loggerClass = new LogLiteral<Class<_Logger_>>(Class.class).getLiteral();
+        Set<Class<?>> bindings = new HashSet<>();
+        getAllSuperclassesAndInterfaces(type, bindings);
+        return bindings.stream().map(loggerClass::cast).collect(toSet());
     }
 }
