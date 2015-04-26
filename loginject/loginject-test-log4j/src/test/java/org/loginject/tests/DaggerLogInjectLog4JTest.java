@@ -14,24 +14,42 @@
 // limitations under the License.                                           //
 //                                                                          //
 
-package org.loginject;
+package org.loginject.tests;
 
-import org.glassfish.hk2.utilities.Binder;
-import org.glassfish.hk2.utilities.binding.AbstractBinder;
-import org.loginject.LogInjectionService;
+import javax.inject.Inject;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.junit.Test;
+import dagger.Module;
+import dagger.ObjectGraph;
+import dagger.Provides;
+import static org.junit.Assert.assertEquals;
+import static org.loginject.LogInject.loginject;
+import static org.loginject.LogParameter.currentClass;
 
-public class HK2LogInjectionService<_Logger_> implements LogInjectionService<Binder, _Logger_>
+public class DaggerLogInjectLog4JTest
 {
-    public Binder getBindings(LogInject<_Logger_> logInject)
-	{
-		return new AbstractBinder()
-		{
-			@Override
-			protected void configure()
-			{
-				bind(logInject).to(LogInject.class);
-				addActiveDescriptor(HK2LogInjectionResolver.class);
-			}
-		};
-	}
+    static class TestClass
+    {
+        @Inject
+        Logger logger;
+    }
+
+    @Module(injects=TestClass.class)
+    public static class DaggerModule
+    {
+        @Provides
+        Logger provideLogger()
+        {
+            return loginject(LogManager::getLogger, currentClass()).as(Logger.class);
+        }
+    }
+
+    @Test
+    public void testInferredLog4J()
+    {
+        ObjectGraph objectGraph = ObjectGraph.create(new DaggerModule());
+        TestClass service = objectGraph.get(TestClass.class);
+        assertEquals(TestClass.class.getName(), service.logger.getName());
+    }
 }

@@ -49,12 +49,6 @@ import static java.util.stream.Collectors.toSet;
 public class GuiceLogInjectionService<_Logger_> implements LogInjectionService<Module, _Logger_>
 {
     @Override
-    public Class<Module> getBindingType()
-    {
-        return Module.class;
-    }
-
-    @Override
     public Module getBindings(LogInject<_Logger_> logInject)
     {
         Stream<Class<_Logger_>> bindings = getBindingClasses(logInject);

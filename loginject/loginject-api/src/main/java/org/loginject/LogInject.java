@@ -128,8 +128,7 @@ public class LogInject<_Logger_>
     {
         ServiceLoader<LogInjectionService<?, _Logger_>> serviceLoader = ServiceLoader.load(classLogInjectionService);
         Stream<LogInjectionService<?, _Logger_>> allImplementations = stream(serviceLoader.spliterator(), false);
-        Predicate<? super LogInjectionService<?, _Logger_>> matchBinding =
-            service -> service.getBindingType().equals(binding);
+        Predicate<LogInjectionService<?, _Logger_>> matchBinding = service -> service.supports(this, binding);
         Optional<LogInjectionService<?, _Logger_>> implementation = allImplementations.filter(matchBinding).findFirst();
         @SuppressWarnings("unchecked")
         _Binding_ bindings = (_Binding_)implementation.orElseThrow(noBindingFor(binding)).getBindings(this);

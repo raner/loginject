@@ -25,54 +25,27 @@
   <artifactId>loginject</artifactId>
   <version>1.0.0</version>
  </parent>
- <artifactId>loginject-test-log4j</artifactId>
- <name>loginject Tests with Log4J</name>
+ <artifactId>loginject-dagger</artifactId>
+ <name>loginject for Dagger</name>
 
  <dependencies>
   <dependency>
-   <groupId>org.apache.logging.log4j</groupId>
-   <artifactId>log4j-api</artifactId>
-   <scope>test</scope>
-  </dependency>
-  <dependency>
-   <groupId>org.apache.logging.log4j</groupId>
-   <artifactId>log4j-core</artifactId>
-   <scope>test</scope>
-  </dependency>
-  <dependency>
    <groupId>org.loginject</groupId>
    <artifactId>loginject-api</artifactId>
-   <scope>test</scope>
   </dependency>
   <dependency>
-   <groupId>org.loginject</groupId>
-   <artifactId>loginject-hk2</artifactId>
-   <version>1.0.0</version>
-   <scope>test</scope>
-  </dependency>
-  <dependency>
-   <groupId>org.loginject</groupId>
-   <artifactId>loginject-guice</artifactId>
-   <version>1.0.0</version>
-   <scope>test</scope>
-  </dependency>
-  <dependency>
-   <groupId>org.loginject</groupId>
-   <artifactId>loginject-dagger</artifactId>
-   <version>1.0.0</version>
-   <scope>test</scope>
+   <groupId>com.squareup.dagger</groupId>
+   <artifactId>dagger</artifactId>
   </dependency>
   <dependency>
    <groupId>com.squareup.dagger</groupId>
    <artifactId>dagger-compiler</artifactId>
    <optional>true</optional>
-   <scope>test</scope>
   </dependency>
   <dependency>
    <groupId>com.squareup</groupId>
    <artifactId>javawriter</artifactId>
    <optional>true</optional>
-   <scope>test</scope>
   </dependency>
  </dependencies>
 
