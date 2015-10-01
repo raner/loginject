@@ -41,6 +41,10 @@ public class GuiceLoggerTest
         Logger injectedLogger;
     }
 
+    static class SubClass1 extends TestClass {}
+
+    static class SubClass2 extends TestClass {}
+
     @Rule
     public TestName testName = new TestName();
 
@@ -104,5 +108,16 @@ public class GuiceLoggerTest
         TestClass service = injector.getInstance(TestClass.class);
         assertEquals(name, service.injectedLogger.getName());
         assertEquals(MF, service.injectedLogger.getMessageFactory());
+    }
+
+    @Test
+    public void testLoggerForSubclasses()
+    {
+        Module module = loginject(Logger.class, LogManager::getLogger, currentClass()).as(Module.class);
+        Injector injector = Guice.createInjector(module);
+        SubClass1 service1 = injector.getInstance(SubClass1.class);
+        SubClass2 service2 = injector.getInstance(SubClass2.class);
+        assertEquals(SubClass1.class.getName(), service1.injectedLogger.getName());
+        assertEquals(SubClass2.class.getName(), service2.injectedLogger.getName());
     }
 }

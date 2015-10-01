@@ -24,6 +24,14 @@ import org.glassfish.hk2.api.InjectionResolver;
 import org.glassfish.hk2.api.Rank;
 import org.glassfish.hk2.api.ServiceHandle;
 
+/**
+* The class {@link HK2LogInjectionResolver} implements an {@link InjectionResolver} for the HK2 dependency injection
+* framework. It detects injection requests whose required type is compatible with {@link LogInject#getLoggerClass()}
+* and creates an appropriate logger.
+* All other requests are passed on to HK2's JSR-330 system resolver.
+*
+* @author Mirko Raner
+**/
 @Rank(1)
 @Singleton
 public class HK2LogInjectionResolver implements InjectionResolver<Inject>
@@ -42,7 +50,9 @@ public class HK2LogInjectionResolver implements InjectionResolver<Inject>
         && ((Class<?>)injectee.getRequiredType()).isAssignableFrom(logInject.getLoggerClass()))
         {
             Class<?> injecteeClass = injectee.getInjecteeClass();
-            return logInject.createLogger(injecteeClass);
+            Class<?> implementationClass = injectee.getInjecteeDescriptor().getImplementationClass();
+            Class<?> logger = (injecteeClass.isAssignableFrom(implementationClass))? implementationClass:injecteeClass;
+            return logInject.createLogger(logger);
         }
         return systemResolver.resolve(injectee, root);
     }

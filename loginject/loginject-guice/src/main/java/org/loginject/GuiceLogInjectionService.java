@@ -16,8 +16,10 @@
 
 package org.loginject;
 
+import java.util.Collections;
 import java.util.HashSet;
-import java.util.Optional;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -34,6 +36,7 @@ import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.ProviderInstanceBinding;
 import com.google.inject.spi.ProvisionListener;
 import com.google.inject.util.Modules;
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
 /**
@@ -52,8 +55,7 @@ public class GuiceLogInjectionService<_Logger_> implements LogInjectionService<M
     public Module getBindings(LogInject<_Logger_> logInject)
     {
         Stream<Class<_Logger_>> bindings = getBindingClasses(logInject);
-        Module[] modules = bindings.map(binding -> getBindings(logInject, binding)).toArray(Module[]::new);
-        return Modules.combine(modules);
+        return Modules.combine(bindings.map(binding -> getBindings(logInject, binding)).toArray(Module[]::new));
     }
 
     private Module getBindings(LogInject<_Logger_> logInject, Class<_Logger_> loggerClass)
@@ -74,13 +76,24 @@ public class GuiceLogInjectionService<_Logger_> implements LogInjectionService<M
                         Binding<_Target_> binding = provision.getBinding();
                         if (loggerType.equals(binding.getKey().getTypeLiteral()))
                         {
-                            Stream<DependencyAndSource> stream = provision.getDependencyChain().stream();
-                            Stream<Dependency<?>> dependencies = stream.map(DependencyAndSource::getDependency);
-                            Optional<Dependency<?>> loggerDependency = dependencies.filter(matchesLogger).findFirst();
-                            if (loggerDependency.isPresent())
+                            Dependency<?> loggerDependency;
+                            Stream<Dependency<?>> stream;
+                            stream = provision.getDependencyChain().stream().map(DependencyAndSource::getDependency);
+                            Iterator<Dependency<?>> dependencies = reverse(stream.collect(toList())).iterator();
+                            if (dependencies.hasNext() && matchesLogger.test(loggerDependency = dependencies.next()))
                             {
-                                InjectionPoint injectionPoint = loggerDependency.get().getInjectionPoint();
+                                InjectionPoint injectionPoint = loggerDependency.getInjectionPoint();
                                 TypeLiteral<?> declaringType = injectionPoint.getDeclaringType();
+                                TypeLiteral<?> targetType = null;
+                                if (dependencies.hasNext())
+                                {
+                                    TypeLiteral<?> typeLiteral = dependencies.next().getKey().getTypeLiteral();
+                                    if (declaringType.getRawType().isAssignableFrom(typeLiteral.getRawType()))
+                                    {
+                                        targetType = typeLiteral;
+                                    }
+                                }
+                                Class<?> loggerClass = (targetType != null? targetType:declaringType).getRawType();
                                 BindingTargetVisitor<_Target_, Void> bindingTargetVisitor;
                                 bindingTargetVisitor = new DefaultBindingTargetVisitor<_Target_, Void>()
                                 {
@@ -89,7 +102,7 @@ public class GuiceLogInjectionService<_Logger_> implements LogInjectionService<M
                                     {
                                         if (provider.equals(binding.getUserSuppliedProvider()))
                                         {
-                                            provider.setLogger(logInject.createLogger(declaringType.getRawType()));
+                                            provider.setLogger(logInject.createLogger(loggerClass));
                                         }
                                         return null;
                                     }
@@ -134,6 +147,12 @@ public class GuiceLogInjectionService<_Logger_> implements LogInjectionService<M
     {
         String name = type.getName();
         return !name.startsWith("java.") || name.startsWith("java.util.logging.");
+    }
+
+    private <_Type_> List<_Type_> reverse(List<_Type_> list)
+    {
+        Collections.reverse(list);
+        return list;
     }
 
     Stream<Class<_Logger_>> getAllBindingTypes(Class<?> type)

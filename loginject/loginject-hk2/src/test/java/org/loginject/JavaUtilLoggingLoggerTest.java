@@ -40,6 +40,10 @@ public class JavaUtilLoggingLoggerTest
         Logger injectedLogger;
     }
 
+    static class SubClass1 extends TestClass {}
+
+    static class SubClass2 extends TestClass {}
+
     @Rule
     public TestName testName = new TestName();
 
@@ -92,6 +96,25 @@ public class JavaUtilLoggingLoggerTest
         ServiceLocator serviceLocator = ServiceLocatorUtilities.bind(testName.getMethodName(), binder);
         TestClass service = serviceLocator.getService(TestClass.class);
         assertEquals(TestClass.class.getName(), service.injectedLogger.getName());
+    }
+
+    @Test
+    public void testSubclassLoggerInjection()
+    {
+        AbstractBinder binder = new AbstractBinder()
+        {
+            @Override
+            protected void configure()
+            {
+                install(loginject(Logger::getLogger, currentClassName()).as(Binder.class));
+                addActiveDescriptor(TestClass.class);
+                addActiveDescriptor(SubClass1.class);
+                addActiveDescriptor(SubClass2.class);
+            }
+        };
+        ServiceLocator serviceLocator = ServiceLocatorUtilities.bind(testName.getMethodName(), binder);
+        assertEquals(SubClass1.class.getName(), serviceLocator.getService(SubClass1.class).injectedLogger.getName());
+        assertEquals(SubClass2.class.getName(), serviceLocator.getService(SubClass2.class).injectedLogger.getName());
     }
 
     @Test
