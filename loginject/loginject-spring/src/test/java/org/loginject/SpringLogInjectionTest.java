@@ -24,10 +24,11 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.loginject.LogInject.loginject;
 import static org.loginject.LogParameter.currentClassName;
 
-public class JavaUtilLoggingLoggerTest
+public class SpringLogInjectionTest
 {
     @Configuration
     static class Binder
@@ -39,19 +40,9 @@ public class JavaUtilLoggingLoggerTest
         }
 
         @Bean
-        static BeanFactoryPostProcessor injectLogger()
+        OtherClass getOtherClass()
         {
-            return loginject(Logger::getLogger, currentClassName()).as(BeanFactoryPostProcessor.class);
-        }
-    }
-
-    @Configuration
-    static class BinderForSubClass
-    {        
-        @Bean
-        SubClass getSubClass()
-        {
-            return new SubClass();
+            return new OtherClass();
         }
 
         @Bean
@@ -65,9 +56,12 @@ public class JavaUtilLoggingLoggerTest
     {
         @Inject
         Logger injectedLogger;
+
+        @Inject
+        OtherClass otherClass;
     }
 
-    static class SubClass extends TestClass
+    static class OtherClass
     {
         // No additional fields or methods...
     }
@@ -79,16 +73,7 @@ public class JavaUtilLoggingLoggerTest
         {
             TestClass service = context.getBean(TestClass.class);
             assertEquals(TestClass.class.getName(), service.injectedLogger.getName());
-        }
-    }
-
-    @Test
-    public void testGetLoggerForSubClass()
-    {
-        try (AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(BinderForSubClass.class))
-        {
-            TestClass service = context.getBean(SubClass.class);
-            assertEquals(SubClass.class.getName(), service.injectedLogger.getName());
+            assertNotNull(service.otherClass);
         }
     }
 }

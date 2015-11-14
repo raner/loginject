@@ -16,10 +16,10 @@
 
 package org.loginject;
 
-import java.lang.reflect.Field;
-import java.util.function.Function;
-import java.util.stream.Stream;
+import java.beans.PropertyDescriptor;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.PropertyValues;
+import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.DependencyDescriptor;
@@ -29,7 +29,7 @@ import org.springframework.context.annotation.ContextAnnotationAutowireCandidate
 
 /**
  * The {@link SpringLogInjectionService} implements log injection for the Spring Framework. It exposes logger
- * bindings as a {@link BeanFactoryPostProcessor}.
+ * bindings as a Spring {@link BeanFactoryPostProcessor}.
  *
  * @param <_Logger_> the logger type
  *
@@ -37,61 +37,43 @@ import org.springframework.context.annotation.ContextAnnotationAutowireCandidate
  */
 public class SpringLogInjectionService<_Logger_> implements LogInjectionService<BeanFactoryPostProcessor, _Logger_>
 {
-    private Field declaringClassField;
-    private Field containingClassField;
-
-    /**
-     * Creates a new instance of the {@link SpringLogInjectionService}.
-     */
-    public SpringLogInjectionService()
-    {
-        try
-        {
-            declaringClassField = DependencyDescriptor.class.getDeclaredField("declaringClass");
-            containingClassField = DependencyDescriptor.class.getDeclaredField("containingClass");
-            Stream.of(declaringClassField, containingClassField).forEach(field -> field.setAccessible(true));
-        }
-        catch (NoSuchFieldException noSuchField)
-        {
-            throw new NoSuchFieldError(noSuchField.getMessage());
-        }
-    }
-
+    @Override
     public BeanFactoryPostProcessor getBindings(LogInject<_Logger_> logInject)
-	{
-		return new BeanFactoryPostProcessor()
-		{
-			@Override
-			public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException
-			{
-				DefaultListableBeanFactory defaultListableBeanFactory = (DefaultListableBeanFactory)beanFactory;
-				AutowireCandidateResolver resolver = new ContextAnnotationAutowireCandidateResolver()
-				{
-					@Override
-					public Object getSuggestedValue(DependencyDescriptor descriptor)
-					{
-						return logInject.createLogger(getInjecteeClass(descriptor));
-					}
-				};
-				defaultListableBeanFactory.setAutowireCandidateResolver(resolver);
-			}
-		};
-	}
-
-    Class<?> getInjecteeClass(DependencyDescriptor descriptor)
     {
-        Function<Field, Object> get = field ->
+        return new BeanFactoryPostProcessor()
         {
-            try
+            ThreadLocal<Object> injectee = new ThreadLocal<>();
+
+            @Override
+            public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException
             {
-                return field.get(descriptor);
-            }
-            catch (IllegalAccessException illegalAccess)
-            {
-                throw new IllegalAccessError(illegalAccess.getMessage());
+                DefaultListableBeanFactory defaultListableBeanFactory = (DefaultListableBeanFactory)beanFactory;
+                AutowireCandidateResolver resolver = new ContextAnnotationAutowireCandidateResolver()
+                {
+                    @Override
+                    public Object getSuggestedValue(DependencyDescriptor descriptor)
+                    {
+                        if (descriptor.getDependencyType().equals(logInject.getLoggerClass()))
+                        {
+                            return logInject.createLogger(injectee.get().getClass());
+                        }
+                        return null;
+                    }
+                };
+                AutowiredAnnotationBeanPostProcessor beanPostProcessor = new AutowiredAnnotationBeanPostProcessor()
+                {
+                    @Override
+                    public PropertyValues postProcessPropertyValues(PropertyValues values, PropertyDescriptor[] descriptors,
+                        Object bean, String beanName) throws BeansException
+                    {
+                        injectee.set(bean);
+                        return super.postProcessPropertyValues(values, descriptors, bean, beanName);
+                    }
+                };
+                beanPostProcessor.setBeanFactory(defaultListableBeanFactory);
+                defaultListableBeanFactory.addBeanPostProcessor(beanPostProcessor);
+                defaultListableBeanFactory.setAutowireCandidateResolver(resolver);
             }
         };
-        Stream<Field> fields = Stream.of(containingClassField, declaringClassField);
-        return fields.map(get).filter(Class.class::isInstance).map(Class.class::cast).findFirst().get();
     }
 }
