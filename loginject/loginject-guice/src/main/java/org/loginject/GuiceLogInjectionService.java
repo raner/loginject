@@ -1,5 +1,5 @@
 //                                                                          //
-// Copyright 2015 Mirko Raner                                               //
+// Copyright 2016 Mirko Raner                                               //
 //                                                                          //
 // Licensed under the Apache License, Version 2.0 (the "License");          //
 // you may not use this file except in compliance with the License.         //
@@ -13,7 +13,6 @@
 // See the License for the specific language governing permissions and      //
 // limitations under the License.                                           //
 //                                                                          //
-
 package org.loginject;
 
 import java.util.Collections;
@@ -61,7 +60,7 @@ public class GuiceLogInjectionService<_Logger_> implements LogInjectionService<M
     private Module getBindings(LogInject<_Logger_> logInject, Class<_Logger_> loggerClass)
     {
         TypeLiteral<_Logger_> loggerType = TypeLiteral.get(loggerClass);
-        GuiceLoggerProvider<_Logger_> provider = new GuiceLoggerProvider<_Logger_>();
+        GuiceLoggerProvider<_Logger_> provider = new GuiceLoggerProvider<>();
         Predicate<Dependency<?>> matchesLogger = dependency -> loggerType.equals(dependency.getKey().getTypeLiteral());
         return new AbstractModule()
         {
@@ -93,16 +92,16 @@ public class GuiceLogInjectionService<_Logger_> implements LogInjectionService<M
                                         targetType = typeLiteral;
                                     }
                                 }
-                                Class<?> loggerClass = (targetType != null? targetType:declaringType).getRawType();
+                                Class<?> logger = (targetType != null? targetType:declaringType).getRawType();
                                 BindingTargetVisitor<_Target_, Void> bindingTargetVisitor;
                                 bindingTargetVisitor = new DefaultBindingTargetVisitor<_Target_, Void>()
                                 {
                                     @Override
-                                    public Void visit(ProviderInstanceBinding<? extends _Target_> binding)
+                                    public Void visit(ProviderInstanceBinding<? extends _Target_> instanceBinding)
                                     {
-                                        if (provider.equals(binding.getUserSuppliedProvider()))
+                                        if (provider.equals(instanceBinding.getUserSuppliedProvider()))
                                         {
-                                            provider.setLogger(logInject.createLogger(loggerClass));
+                                            provider.setLogger(logInject.createLogger(logger));
                                         }
                                         return null;
                                     }
@@ -149,7 +148,7 @@ public class GuiceLogInjectionService<_Logger_> implements LogInjectionService<M
         return !name.startsWith("java.") || name.startsWith("java.util.logging.");
     }
 
-    private <_Type_> List<_Type_> reverse(List<_Type_> list)
+    <_Type_> List<_Type_> reverse(List<_Type_> list)
     {
         Collections.reverse(list);
         return list;
