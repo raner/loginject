@@ -1,5 +1,5 @@
 //                                                                          //
-// Copyright 2015 Mirko Raner                                               //
+// Copyright 2016 Mirko Raner                                               //
 //                                                                          //
 // Licensed under the Apache License, Version 2.0 (the "License");          //
 // you may not use this file except in compliance with the License.         //
@@ -13,7 +13,6 @@
 // See the License for the specific language governing permissions and      //
 // limitations under the License.                                           //
 //                                                                          //
-
 package org.loginject;
 
 import org.glassfish.hk2.utilities.Binder;
@@ -22,6 +21,7 @@ import org.loginject.LogInjectionService;
 
 public class HK2LogInjectionService<_Logger_> implements LogInjectionService<Binder, _Logger_>
 {
+    @Override
     public Binder getBindings(LogInject<_Logger_> logInject)
 	{
 		return new AbstractBinder()

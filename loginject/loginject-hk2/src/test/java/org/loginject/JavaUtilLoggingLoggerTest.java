@@ -1,5 +1,5 @@
 //                                                                          //
-// Copyright 2015 Mirko Raner                                               //
+// Copyright 2016 Mirko Raner                                               //
 //                                                                          //
 // Licensed under the Apache License, Version 2.0 (the "License");          //
 // you may not use this file except in compliance with the License.         //
@@ -40,9 +40,9 @@ public class JavaUtilLoggingLoggerTest
         Logger injectedLogger;
     }
 
-    static class SubClass1 extends TestClass {}
+    static class SubClass1 extends TestClass {/* No methods */}
 
-    static class SubClass2 extends TestClass {}
+    static class SubClass2 extends TestClass {/* No methods */}
 
     @Rule
     public TestName testName = new TestName();
