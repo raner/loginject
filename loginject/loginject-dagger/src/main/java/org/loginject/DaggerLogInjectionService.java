@@ -27,11 +27,11 @@ import java.util.stream.Stream;
 * Dagger {@link dagger.Module Module}s cannot be created as objects in memory, like for HK2 and Guice. As Dagger's
 * instrumentation needs to process the module file, there is no support for modules that do not exist as source and
 * class files.
-* <p/>
+* <p>
 * To bring loginject's value to Dagger, {@link DaggerLogInjectionService} simply determines the injection point based
 * on the call stack at the time when the logger is created. This is not a great solution, because it makes some
 * assumptions about Dagger's generated class names.
-* <p/>
+* <p>
 * To establish a generic binding for loggers in Dagger, follow this example code:
 * <pre>
 *    {@literal @}Module(injects=TestClass.class)
@@ -48,8 +48,7 @@ import java.util.stream.Stream;
 * a binder or a module. This also means that both type parameters of {@link LogInjectionService} remain unbound for
 * {@link DaggerLogInjectionService} (it implements {@code LogInjectionService<_Logger_, _Logger_>}, rather than
 * something like {@code LogInjectionService<Binder, _Logger_>}).
-* <p/>
-*
+* <p>
 * @param <_Logger_> the logger type
 *
 * @author Mirko Raner

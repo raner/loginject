@@ -29,7 +29,8 @@ import static java.util.stream.StreamSupport.stream;
 /**
 * The {@link LogInject} class provides static methods for creating injectee-sensitive bindings for loggers. The
 * resulting {@link LogInject} object's {@link #as(Class)} method will provide the actual binding object for a
-* particular dependency injection framework (such as Guice, HK2, etc.). <p/>
+* particular dependency injection framework (such as Guice, HK2, etc.).
+* <p>
 * {@link LogInject} allows you to bind loggers with standard JSR-330 annotations:
 * <pre>
 *        class TestClass
@@ -45,7 +46,7 @@ import static java.util.stream.StreamSupport.stream;
 * {@link LogInjectionService} needs to be installed. The available {@link LogInjectionService}s are discovered
 * dynamically via Java's {@link ServiceLoader} mechanism, so it is sufficient to have the service implementation JAR
 * on the class path (no additional configuration is required). No support is needed for specific logging frameworks.
-* <p/>
+* <p>
 * For example, to use {@link LogInject} with the HK2 dependency injection framework {@link java.util.logging.Logger},
 * you could create the following HK2 binder:
 * <pre>
@@ -61,7 +62,7 @@ import static java.util.stream.StreamSupport.stream;
 *        };
 * </pre>
 * <b>Known Limitations</b>
-* <p/>
+* <p>
 * Currently, loginject only supports factory methods with zero, one, or two parameters.
 *
 * @param <_Logger_> the logger type (e.g., {@link java.util.logging.Logger})
@@ -70,7 +71,7 @@ import static java.util.stream.StreamSupport.stream;
 **/
 public class LogInject<_Logger_>
 {
-    static enum ClassType {INTERFACE, IMPLEMENTATION};
+    static enum ClassType {INTERFACE, IMPLEMENTATION}
 
     private ClassType type;
     private Class<LogInjectionService<?, _Logger_>> classLogInjectionService;
@@ -120,6 +121,7 @@ public class LogInject<_Logger_>
     /**
     * Creates dependency injection bindings for a specific DI framework.
     *
+    * @param <_Binding_> the binding type
     * @param binding the binding class
     * @return the bindings
     * @throws LogInjectException if no implementation for the requested binding class is available
@@ -136,22 +138,32 @@ public class LogInject<_Logger_>
     }
 
     /**
-    * Provides a {@link LogInject} binding that binds the specified logger class to a zero-argument factory method. <p/>
+    * Provides a {@link LogInject} binding that binds the specified logger class to a zero-argument factory method.
+    * <p>
     * Example use:
     * <pre>
     *     loginject(Logger.class, LogManager::getLogger)
     * </pre>
+    * @param <_Logger_> the logger type
     * @param loggerClass the logger class
     * @param factory the logger supplier
     * @return the {@link LogInject} object presenting the abstract (framework-independent) bindings
     **/
     public static <_Logger_> LogInject<_Logger_> loginject(Class<_Logger_> loggerClass, Supplier<_Logger_> factory)
     {
-        return new LogInject<_Logger_>(loggerClass, noParameters -> factory.get());
+        // NOTE: for some reason, Eclipse's compiler is O.K. with using the diamond operator (i.e., new LogInject<>) here,
+        //       but javac says it's ambiguous and fails on the command line...
+        @SuppressWarnings("unused")
+        LogInject<_Logger_> loginject = new LogInject<_Logger_>(loggerClass, noParameters -> factory.get());
+        return loginject;
     }
 
     /**
     * @deprecated use {@link #loginject(Class, Supplier)}
+    * @param <_Logger_> the logger type
+    * @param loggerClass the logger class
+    * @param loggerSupplier the logger supplier
+    * @return the {@link LogInject} object presenting the abstract (framework-independent) bindings
     **/
     @Deprecated
     public static <_Logger_> LogInject<_Logger_> logger(Class<_Logger_> loggerClass, Supplier<_Logger_> loggerSupplier)
@@ -160,11 +172,14 @@ public class LogInject<_Logger_>
     }
 
     /**
-    * Provides a {@link LogInject} binding that binds the specified logger class to a one-argument factory method. <p/>
+    * Provides a {@link LogInject} binding that binds the specified logger class to a one-argument factory method.
+    * <p>
     * Example use:
     * <pre>
     *     loginject(Logger.class, LogManager::getLogger, currentClass())
     * </pre>
+    * @param <_Logger_> the logger type
+    * @param <_Parameter_> the log parameter type
     * @param loggerClass the logger class
     * @param loggerFactory the logger factory
     * @param parameter the {@link LogParameter} to be passed to the factory method
@@ -175,11 +190,17 @@ public class LogInject<_Logger_>
     {
         @SuppressWarnings("unchecked")
         Function<Object[], _Logger_> loggerFunction = oneParameter -> loggerFactory.apply((_Parameter_)oneParameter[0]);
-        return new LogInject<_Logger_>(loggerClass, loggerFunction, parameter);
+        return new LogInject<>(loggerClass, loggerFunction, parameter);
     }
 
     /**
     * @deprecated use {@link #loginject(Class, Function, LogParameter)}
+    * @param <_Logger_> the logger type
+    * @param <_Parameter_> the log parameter type
+    * @param loggerClass the logger class
+    * @param loggerFactory the logger factory
+    * @param parameter the {@link LogParameter} to be passed to the factory method
+    * @return the {@link LogInject} object presenting the abstract (framework-independent) bindings
     **/
     @Deprecated
     public static <_Logger_, _Parameter_> LogInject<_Logger_> logger(Class<_Logger_> loggerClass,
@@ -189,11 +210,15 @@ public class LogInject<_Logger_>
     }
 
     /**
-    * Provides a {@link LogInject} binding that binds the specified logger class to a two-argument factory method. <p/>
+    * Provides a {@link LogInject} binding that binds the specified logger class to a two-argument factory method.
+    * <p>
     * Example use:
     * <pre>
     *     loginject(Logger.class, LogManager::getLogger, currentClass(), parameter(myMessageFactory))
     * </pre>
+    * @param <_Logger_> the logger type
+    * @param <_Parameter0_> the first log parameter type
+    * @param <_Parameter1_> the first log parameter type
     * @param loggerClass the logger class
     * @param loggerFactory the logger factory
     * @param parameter0 the first {@link LogParameter} to be passed to the factory method
@@ -207,11 +232,19 @@ public class LogInject<_Logger_>
         @SuppressWarnings("unchecked")
         Function<Object[], _Logger_> function =
             parameters -> loggerFactory.apply((_Parameter0_)parameters[0], (_Parameter1_)parameters[1]);
-        return new LogInject<_Logger_>(loggerClass, function, parameter0, parameter1);
+        return new LogInject<>(loggerClass, function, parameter0, parameter1);
     }
 
     /**
     * @deprecated use {@link #loginject(Class, BiFunction, LogParameter, LogParameter)}
+    * @param <_Logger_> the logger type
+    * @param <_Parameter0_> the first log parameter type
+    * @param <_Parameter1_> the first log parameter type
+    * @param loggerClass the logger class
+    * @param loggerFactory the logger factory
+    * @param parameter0 the first {@link LogParameter} to be passed to the factory method
+    * @param parameter1 the second {@link LogParameter} to be passed to the factory method
+    * @return the {@link LogInject} object presenting the abstract (framework-independent) bindings
     **/
     @Deprecated
     public static <_Logger_, _Parameter0_, _Parameter1_> LogInject<_Logger_> logger(Class<_Logger_> loggerClass,
@@ -223,26 +256,32 @@ public class LogInject<_Logger_>
 
     /**
     * Provides a {@link LogInject} binding that binds a zero-argument logger factory method. The logger type is
-    * inferred from the factory method. <p/>
+    * inferred from the factory method.
+    * <p>
     * Example use:
     * <pre>
     *     loginject(LogManager::getLogger)
     * </pre>
-    * @param factory the logger supplier
+    * @param <_Logger_> the logger type
+    * @param <_Parameter_> the log parameter type
+    * @param loggerFactory the logger supplier
     * @return the {@link LogInject} object presenting the abstract (framework-independent) bindings
     **/
     public static <_Logger_, _Parameter_> LogInject<_Logger_> loginject(Supplier<_Logger_> loggerFactory)
     {
-        return new LogInject<_Logger_>(loggerFactory.get(), noParameters -> loggerFactory.get());
+        return new LogInject<>(loggerFactory.get(), noParameters -> loggerFactory.get());
     }
 
     /**
     * Provides a {@link LogInject} binding that binds a one-argument logger factory method. The logger type is
-    * inferred from the factory method. <p/>
+    * inferred from the factory method.
+    * <p>
     * Example use:
     * <pre>
     *     loginject(LogManager::getLogger, currentClass())
     * </pre>
+    * @param <_Logger_> the logger type
+    * @param <_Parameter_> the log parameter type
     * @param loggerFactory the logger factory
     * @param parameter the {@link LogParameter} to be passed to the factory method
     * @return the {@link LogInject} object presenting the abstract (framework-independent) bindings
@@ -253,16 +292,20 @@ public class LogInject<_Logger_>
         _Logger_ prototypeLogger = loggerFactory.apply(parameter.getValue(LogInject.class));
         @SuppressWarnings("unchecked")
         Function<Object[], _Logger_> function = parameters -> loggerFactory.apply((_Parameter_)parameters[0]);
-        return new LogInject<_Logger_>(prototypeLogger, function, parameter);
+        return new LogInject<>(prototypeLogger, function, parameter);
     }
     
     /**
     * Provides a {@link LogInject} binding that binds a two-argument logger factory method. The logger type is
-    * inferred from the factory method. <p/>
+    * inferred from the factory method.
+    * <p>
     * Example use:
     * <pre>
     *     loginject(LogManager::getLogger, currentClass(), parameter(myMessageFactory))
     * </pre>
+    * @param <_Logger_> the logger type
+    * @param <_Parameter0_> the first log parameter type
+    * @param <_Parameter1_> the first log parameter type
     * @param loggerFactory the logger factory
     * @param parameter0 the first {@link LogParameter} to be passed to the factory method
     * @param parameter1 the second {@link LogParameter} to be passed to the factory method
@@ -277,7 +320,7 @@ public class LogInject<_Logger_>
         @SuppressWarnings("unchecked")
         Function<Object[], _Logger_> function =
             parameters -> loggerFactory.apply((_Parameter0_)parameters[0], (_Parameter1_)parameters[1]);
-        return new LogInject<_Logger_>(prototypeLogger, function, parameter0, parameter1);
+        return new LogInject<>(prototypeLogger, function, parameter0, parameter1);
     }
 
     private Supplier<LogInjectException> noBindingFor(Class<?> bindingClass)

@@ -63,7 +63,7 @@ public class LogParameter<_Type_>
     * Returns a {@link LogParameter} representing a constant string (always the same string, independent of injection
     * point).
     *
-    * @param the string
+    * @param string the constant string
     * @return the {@link LogParameter}
     **/
     public static LogParameter<String> constantString(String string)
@@ -75,14 +75,15 @@ public class LogParameter<_Type_>
     * Returns a {@link LogParameter} representing a constant value (always the same value, independent of injection
     * point).
     *
-    * @param the value
+    * @param <_Parameter_> the log parameter type
+    * @param parameter the value
     * @return the {@link LogParameter}
     **/
     public static <_Parameter_> LogParameter<_Parameter_> parameter(_Parameter_ parameter)
     {
         @SuppressWarnings("unchecked")
         Class<_Parameter_> parameterType = (Class<_Parameter_>)parameter.getClass();
-        return new LogParameter<_Parameter_>(parameterType, always -> parameter);
+        return new LogParameter<>(parameterType, always -> parameter);
     }
 
     /**
