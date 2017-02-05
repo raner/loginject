@@ -56,15 +56,27 @@ The `loginject(Logger::getLogger, currentClassName())` expression provides a gen
 
 ## FAQ
 
-### How can I use loginject with Spring?
-
-To use loginject in your Spring application, you need to include these two dependencies in your POM:
+### What Maven dependencies do I need for using loginject?
+Assuming that you already have all the necessary dependencies for your dependency injection framework (e.g., Spring, Guice) and for your logging framework (e.g., Log4J, SLF4J), you will need two additional dependencies for **loginject**. You will always need the common **loginject** API (```org.loginject:loginject-api```), but you will also need its specific implementation that supports the dependency injection framework you use. For example, for using **loginject** in conjunction with Guice, you would add the following dependencies:
 ```xml
   <dependency>
    <groupId>org.loginject</groupId>
    <artifactId>loginject-api</artifactId>
    <version>1.0.0</version>
   </dependency>
+  <dependency>
+   <groupId>org.loginject</groupId>
+   <artifactId>loginject-guice</artifactId>
+   <version>1.0.0</version>
+   <scope>runtime</scope>
+  </dependency>
+```
+Note that the second dependency is always strictly a ```runtime``` dependency: you don't need it to compile your code, but you do need it to actually run your code.
+If you are using a dependency management system other than Maven (e.g., Gradle or SBT), please use the same dependency coordinates in conjunction with the appropriate syntax.
+
+### How can I use loginject with Spring?
+In addition to ```org.loginject:loginject-api```, you need to also include ```org.loginject:loginject-spring```:
+```xml
   <dependency>
    <groupId>org.loginject</groupId>
    <artifactId>loginject-spring</artifactId>
@@ -87,3 +99,12 @@ import static org.loginject.LogParameter.currentClassName;
     }
 ...
 ```
+### How can I use loginject with Guice?
+The necessary runtime and compile-time Maven dependencies can be found in the earlier section ["What Maven dependencies do I need for using loginject"](#user-content-what-maven-dependencies-do-i-need-for-using-loginject).
+
+At a code level, **loginject** is used as a Guice ```Module```:
+```java
+        Module module = loginject(LogManager::getLogger, currentClass()).as(Module.class);
+        Injector injector = Guice.createInjector(module);
+```
+The module can also be combined with other preexisintg Guice modules.
