@@ -1,5 +1,5 @@
 //                                                                          //
-// Copyright 2015 Mirko Raner                                               //
+// Copyright 2019 Mirko Raner                                               //
 //                                                                          //
 // Licensed under the Apache License, Version 2.0 (the "License");          //
 // you may not use this file except in compliance with the License.         //
@@ -32,7 +32,7 @@ import static java.util.stream.Stream.of;
 *
 * @author Mirko Raner
 **/
-interface LogInjectionService<_Bindings_, _Logger_>
+public interface LogInjectionService<_Bindings_, _Logger_>
 {
     /**
     * Returns the framework-specific bindings that bind a logger a generic fashion (i.e., so that the appropriate logger
