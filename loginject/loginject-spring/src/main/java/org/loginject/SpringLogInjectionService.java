@@ -1,5 +1,5 @@
 //                                                                          //
-// Copyright 2015 Mirko Raner                                               //
+// Copyright 2020 Mirko Raner                                               //
 //                                                                          //
 // Licensed under the Apache License, Version 2.0 (the "License");          //
 // you may not use this file except in compliance with the License.         //
@@ -48,6 +48,7 @@ public class SpringLogInjectionService<_Logger_> implements LogInjectionService<
             public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException
             {
                 DefaultListableBeanFactory defaultListableBeanFactory = (DefaultListableBeanFactory)beanFactory;
+                AutowireCandidateResolver defaultResolver = defaultListableBeanFactory.getAutowireCandidateResolver();
                 AutowireCandidateResolver resolver = new ContextAnnotationAutowireCandidateResolver()
                 {
                     @Override
@@ -57,7 +58,7 @@ public class SpringLogInjectionService<_Logger_> implements LogInjectionService<
                         {
                             return logInject.createLogger(injectee.get().getClass());
                         }
-                        return null;
+                        return defaultResolver.getSuggestedValue(descriptor);
                     }
                 };
                 AutowiredAnnotationBeanPostProcessor beanPostProcessor = new AutowiredAnnotationBeanPostProcessor()

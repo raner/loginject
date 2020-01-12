@@ -107,4 +107,10 @@ At a code level, **loginject** is used as a Guice ```Module```:
         Module module = loginject(LogManager::getLogger, currentClass()).as(Module.class);
         Injector injector = Guice.createInjector(module);
 ```
-The module can also be combined with other preexisintg Guice modules.
+The module can also be combined with other pre-existing Guice modules.
+
+### What is new in loginject 1.1.0?
+Several bugs and limitations were addressed in loginject 1.1.0:
+* [Issue #17](https://github.com/raner/loginject/issues/17) - Spring Injection Service breaks resolution of other Spring dependencies
+* [Issue #18](https://github.com/raner/loginject/issues/18) - Upgrade org.springframework:spring-core to the latest version
+* [Issue #19](https://github.com/raner/loginject/issues/19) - Make LogInjectionService public

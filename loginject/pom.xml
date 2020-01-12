@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--                                                                          -->
-<!-- Copyright 2016 Mirko Raner                                               -->
+<!-- Copyright 2020 Mirko Raner                                               -->
 <!--                                                                          -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");          -->
 <!-- you may not use this file except in compliance with the License.         -->
@@ -25,7 +25,7 @@
  <groupId>org.loginject</groupId>
  <artifactId>loginject</artifactId>
  <packaging>pom</packaging>
- <version>1.0.0</version>
+ <version>1.1.0</version>
 
  <description>
   The loginject library facilitates dependency injection for loggers, or, more generally, site-specific dependency injection.
@@ -128,7 +128,7 @@
     <configuration>
      <serverId>central</serverId>
      <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-     <autoReleaseAfterClose>false</autoReleaseAfterClose>
+     <autoReleaseAfterClose>true</autoReleaseAfterClose>
     </configuration>
    </plugin>
   </plugins>
