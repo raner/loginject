@@ -1,5 +1,5 @@
 //                                                                          //
-// Copyright 2015 Mirko Raner                                               //
+// Copyright 2015 - 2020 Mirko Raner                                        //
 //                                                                          //
 // Licensed under the Apache License, Version 2.0 (the "License");          //
 // you may not use this file except in compliance with the License.         //
@@ -50,6 +50,6 @@ public class DaggerLogInjectLog4JTest
     {
         ObjectGraph objectGraph = ObjectGraph.create(new DaggerModule());
         TestClass service = objectGraph.get(TestClass.class);
-        assertEquals(TestClass.class.getName(), service.logger.getName());
+        assertEquals(TestClass.class.getName().replace('$', '.'), service.logger.getName());
     }
 }

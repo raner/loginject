@@ -1,5 +1,5 @@
 //                                                                          //
-// Copyright 2016 Mirko Raner                                               //
+// Copyright 2016 - 2020 Mirko Raner                                        //
 //                                                                          //
 // Licensed under the Apache License, Version 2.0 (the "License");          //
 // you may not use this file except in compliance with the License.         //
@@ -54,7 +54,7 @@ public class GuiceLoggerTest
         Module module = loginject(Logger.class, LogManager::getLogger, currentClass()).as(Module.class);
         Injector injector = Guice.createInjector(module);
         TestClass service = injector.getInstance(TestClass.class);
-        assertEquals(TestClass.class.getName(), service.injectedLogger.getName());
+        assertEquals(TestClass.class.getName().replace('$', '.'), service.injectedLogger.getName());
     }
 
     @Test
@@ -63,7 +63,7 @@ public class GuiceLoggerTest
         Module module = loginject(LogManager::getLogger, currentClass()).as(Module.class);
         Injector injector = Guice.createInjector(module);
         TestClass service = injector.getInstance(TestClass.class);
-        assertEquals(TestClass.class.getName(), service.injectedLogger.getName());
+        assertEquals(TestClass.class.getName().replace('$', '.'), service.injectedLogger.getName());
     }
 
     @Test
@@ -117,7 +117,7 @@ public class GuiceLoggerTest
         Injector injector = Guice.createInjector(module);
         SubClass1 service1 = injector.getInstance(SubClass1.class);
         SubClass2 service2 = injector.getInstance(SubClass2.class);
-        assertEquals(SubClass1.class.getName(), service1.injectedLogger.getName());
-        assertEquals(SubClass2.class.getName(), service2.injectedLogger.getName());
+        assertEquals(SubClass1.class.getName().replace('$', '.'), service1.injectedLogger.getName());
+        assertEquals(SubClass2.class.getName().replace('$', '.'), service2.injectedLogger.getName());
     }
 }
