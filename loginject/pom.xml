@@ -50,7 +50,7 @@
   <!-- Versions: -->
   <hk2.version>2.4.0</hk2.version>
   <guice.version>4.1.0</guice.version>
-  <log4j.version>2.2</log4j.version>
+  <log4j.version>2.13.3</log4j.version>
  </properties>
 
  <scm>
