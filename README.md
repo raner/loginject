@@ -62,12 +62,12 @@ Assuming that you already have all the necessary dependencies for your dependenc
   <dependency>
    <groupId>org.loginject</groupId>
    <artifactId>loginject-api</artifactId>
-   <version>1.0.0</version>
+   <version>1.1.0</version>
   </dependency>
   <dependency>
    <groupId>org.loginject</groupId>
    <artifactId>loginject-guice</artifactId>
-   <version>1.0.0</version>
+   <version>1.1.0</version>
    <scope>runtime</scope>
   </dependency>
 ```
@@ -80,7 +80,7 @@ In addition to ```org.loginject:loginject-api```, you need to also include ```or
   <dependency>
    <groupId>org.loginject</groupId>
    <artifactId>loginject-spring</artifactId>
-   <version>1.0.0</version>
+   <version>1.1.0</version>
    <scope>runtime</scope>
   </dependency>
 ```
