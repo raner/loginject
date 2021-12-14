@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--                                                                          -->
-<!-- Copyright 2020 Mirko Raner                                               -->
+<!-- Copyright 2015 - 2021 Mirko Raner                                        -->
 <!--                                                                          -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");          -->
 <!-- you may not use this file except in compliance with the License.         -->
@@ -50,7 +50,7 @@
   <!-- Versions: -->
   <hk2.version>2.4.0</hk2.version>
   <guice.version>4.1.0</guice.version>
-  <log4j.version>2.13.3</log4j.version>
+  <log4j.version>2.16.0</log4j.version>
  </properties>
 
  <scm>
