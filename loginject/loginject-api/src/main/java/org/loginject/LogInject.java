@@ -23,6 +23,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import static java.util.stream.StreamSupport.stream;
 
@@ -115,7 +116,13 @@ public class LogInject<_Logger_>
     _Logger_ createLogger(Class<?> currentClass)
     {
         Stream<Object> parameters = Arrays.stream(parameterTypes).map(parameter -> parameter.getValue(currentClass));
-        return loggerCreator.apply(parameters.toArray(Object[]::new));
+System.err.println("loggerCreator=" + loggerCreator);
+System.err.println("parameters=" + Arrays.stream(parameterTypes).map(parameter -> parameter.getValue(currentClass)).collect(Collectors.toList()));
+try {
+        _Logger_ logger =  loggerCreator.apply(parameters.toArray(Object[]::new));
+System.err.println("logger=" + logger);
+        return logger;
+} catch (Throwable t) {t.printStackTrace();return null;}
     }
 
     /**
