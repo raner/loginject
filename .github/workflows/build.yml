@@ -28,6 +28,7 @@ jobs:
       with:
         java-version: 11
     - name: Build with Maven
+      working-directory: ./loginject
       run: mvn -B install
     - name: Report Test Results
       uses: dorny/test-reporter@v1
