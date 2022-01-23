@@ -1,4 +1,4 @@
-## loginject &nbsp; ![build](https://github.com/raner/loginject/workflows/build/badge.svg) [![Maven Central](https://img.shields.io/maven-central/v/org.loginject/loginject.svg)](https://oss.sonatype.org/content/repositories/releases/org/loginject/)
+## loginject &nbsp; [![build](https://github.com/raner/loginject/workflows/build/badge.svg)](https://github.com/raner/loginject/actions/workflows/build.yml?query=branch%3Amaster) [![Maven Central](https://img.shields.io/maven-central/v/org.loginject/loginject.svg)](https://oss.sonatype.org/content/repositories/releases/org/loginject/)
 The **loginject** library facilitates dependency injection for loggers.
 
 Nowadays, many Java-based software systems use JSR-330 dependency injection provided by Spring, Guice, HK2 or Dagger to achieve loose coupling between classes.
